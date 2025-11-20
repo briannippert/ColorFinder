@@ -91,7 +91,7 @@ fn find_closest_color(target_ycbcr: ColorYCbCr, named_colors: &[NamedColor]) -> 
         if distance_sq < min_distance_sq {
             min_distance_sq = distance_sq;
             closest_name = &color.name;
-            closest_color_YCbCr = target_ycbcr;
+            closest_color_YCbCr = color.ycbcr;
         }
     }
     let min_distance = min_distance_sq.sqrt();
