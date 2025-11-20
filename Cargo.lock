@@ -8,14 +8,7 @@ version = "0.1.0"
 dependencies = [
  "csv",
  "serde",
- "string",
 ]
-
-[[package]]
-name = "bytes"
-version = "1.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b35204fbdc0b3f4446b89fc1ac2cf84a8a68971995d0bf2e925ec7cd960f9cb3"
 
 [[package]]
 name = "csv"
@@ -102,15 +95,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "string"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73d5d847c1450954c3bcc99db14566d9e4c6ab0736a928bc366d5265e45031e2"
-dependencies = [
- "bytes",
 ]
 
 [[package]]

@@ -52,6 +52,16 @@ fn convert_ycbcr(rgb: ColorRGB) -> ColorYCbCr {
     ColorYCbCr { y, cb, cr }
 }
 
+fn convert_hex(ycbcr: ColorYCbCr) -> String {
+    let r_norm = ycbcr.y + 1.402 * ycbcr.cr;
+    let g_norm = ycbcr.y - 0.344136 * ycbcr.cb - 0.714136 * ycbcr.cr;
+    let b_norm = ycbcr.y + 1.772 * ycbcr.cb;
+    let r = (r_norm.clamp(0.0, 1.0) * 255.0).round() as u8;
+    let g = (g_norm.clamp(0.0, 1.0) * 255.0).round() as u8;
+    let b = (b_norm.clamp(0.0, 1.0) * 255.0).round() as u8;
+    format!("#{:02X}{:02X}{:02X}", r, g, b)
+}
+
 fn hex_to_rgb(hex: &str) -> Result<ColorRGB, &'static str> {
     // Ensure the input is exactly 7 characters long and starts with '#'
     if hex.len() != 7 || !hex.starts_with('#') {
@@ -68,22 +78,25 @@ fn hex_to_rgb(hex: &str) -> Result<ColorRGB, &'static str> {
 
     Ok(ColorRGB { r, g, b })
 }
-fn find_closest_color(target_ycbcr: ColorYCbCr, named_colors: &[NamedColor]) -> (&str, f64) {
+fn find_closest_color(target_ycbcr: ColorYCbCr, named_colors: &[NamedColor]) -> (&str, f64, String) {
     if named_colors.is_empty() {
-        return ("", f64::NAN);
+        return ("", f64::NAN, String::from("NULL"));
     }
     let mut closest_name = "";
     let mut min_distance_sq = f64::MAX;
+    let mut closest_color_YCbCr = ColorYCbCr { y: 0.0, cb: 0.0, cr: 0.0 };
     for color in named_colors {
         let distance_sq = color_distance_sq(target_ycbcr, color.ycbcr);
 
         if distance_sq < min_distance_sq {
             min_distance_sq = distance_sq;
             closest_name = &color.name;
+            closest_color_YCbCr = target_ycbcr;
         }
     }
     let min_distance = min_distance_sq.sqrt();
-    (closest_name, min_distance)
+    let closest_color_hex = convert_hex(closest_color_YCbCr);
+    (closest_name, min_distance, closest_color_hex)
 }
 
 fn color_distance_sq(c1: ColorYCbCr, c2: ColorYCbCr) -> f64 {
@@ -144,10 +157,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     match hex_to_rgb(&input) {
         Ok(input_rgb) => {
             let target_ycbcr = convert_ycbcr(input_rgb);
-            let (closest_name, distance) = find_closest_color(target_ycbcr, &named_colors);
+            let (closest_name, distance, closest_hex) = find_closest_color(target_ycbcr, &named_colors);
             let end_time = Instant::now();
             println!("Processing time: {:.2?}", end_time - start_time);
-            println!("Closest Named Color: **{}**", closest_name);
+            println!("Closest Named Color: {} - {}", closest_name, closest_hex);
             println!("Color Difference (Euclidean Distance in YCbCr space): {:.4}", distance);
         }
         Err(e) => {
